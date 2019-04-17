@@ -1,4 +1,4 @@
-final int GAME_START = 0, GAME_RUN = 1, GAME_OVER = 2;
+ffinal int GAME_START = 0, GAME_RUN = 1, GAME_OVER = 2;
 int gameState = 0;
 PImage groundhogDown,groundhogIdle,groundhogLeft,groundhogRight;
 final int GRASS_HEIGHT = 15;
