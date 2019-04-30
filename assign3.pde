@@ -1,4 +1,4 @@
-ffinal int GAME_START = 0, GAME_RUN = 1, GAME_OVER = 2;
+final int GAME_START = 0, GAME_RUN = 1, GAME_OVER = 2;
 int gameState = 0;
 PImage groundhogDown,groundhogIdle,groundhogLeft,groundhogRight;
 final int GRASS_HEIGHT = 15;
@@ -7,13 +7,14 @@ final int START_BUTTON_H = 60;
 final int START_BUTTON_X = 248;
 final int START_BUTTON_Y = 360;
 boolean upPressed, downPressed, rightPressed, leftPressed;
-
+int startPoint=160;
+boolean move = true;
 float groundhogIdleX=320;
 float groundhogIdleY=80;
 float groundhogDownX=1000,groundhogDownY=-1000;
 float  groundhogLeftX=1000,groundhogLeftY=-1000;
 float groundhogRightX=1000,groundhogRightY=-1000;
-float groundhogIdleSpeed=80;
+float groundhogIdleSpeed;
 float groundhogIdleWidth=80;
 float groundhogIdleHeight=80;
 int soil0X,soil0Y;
@@ -24,6 +25,7 @@ int numSoil=6;
 PImage soil[]=new PImage[numSoil];
 PImage stone1,stone2;
 PImage life;
+
 // For debug function; DO NOT edit or remove this!
 int playerHealth = 2;
 float cameraOffsetY = 0;
@@ -51,7 +53,8 @@ void setup() {
 for(int i=0;i<numSoil;i++){
     soil[i]=loadImage("img/soil"+i+".png");};
 
-  
+  groundhogIdleSpeed = 80/16;
+
 }
   
 void draw() {
@@ -122,14 +125,14 @@ void draw() {
   for(int i=0;i<8;i++){
    
       float x=80*i;
-      
+    
   image(stone1,x,160+80*i);
  }
 //9-16
 pushMatrix();
-translate(-80,0);
+translate(0,0);
 
-  for(int i=0;i<9;i+=4){  
+  for(int i=1;i<9;i+=4){  
     for(int j=0;j<8;j+=4){
     float x=80*i;
     float y=800+80*j;
@@ -138,18 +141,18 @@ translate(-80,0);
     image(stone1,x+80,y);
     }
   }
-  for(int i=0;i<9;i+=4){
+   for(int i=1;i<9;i+=4){  
     for(int j=3;j<8;j+=4){
-  float x=80*i;
+    float x=80*i;
     float y=800+80*j;
     float y2=y+80;
     image(stone1,x,y);
     image(stone1,x+80,y);
     }
-  
   }
+ 
 
-   for(int i=2;i<8;i+=4){  
+   for(int i=-1;i<8;i+=4){  
     for(int j=1;j<8;j+=4){
     float x=80*i;
     float y=800+80*j;
@@ -161,6 +164,7 @@ translate(-80,0);
     }
   
   }
+ 
  popMatrix();
  //17-24  
 for(int k=-8;k<8;k+=3){
@@ -191,31 +195,70 @@ for(int k=-8;k<8;k+=3){
  
 
 		// Player
-image(groundhogIdle,groundhogIdleX,groundhogIdleY);
-image(groundhogDown,groundhogDownX,groundhogDownY);
-image(groundhogLeft,groundhogLeftX,groundhogLeftY);
-image(groundhogRight,groundhogRightX,groundhogRightY);
-if(downPressed){
-groundhogIdleY += groundhogIdleSpeed;
+ // Player
+    if(move){
+      image(groundhogIdle,groundhogIdleX,groundhogIdleY);
+    }
+    
+    if(downPressed){
+      move = false;
+      leftPressed = false;
+      rightPressed = false;
+      image(groundhogDown,groundhogIdleX,groundhogIdleY);
+      if(groundhogIdleY < startPoint+1520){
+       startPoint -= groundhogIdleSpeed;
+        if(startPoint%80 == 0){
+        downPressed = false;
+        move = true;
+        }
+      }
+      else{
+        groundhogIdleY += groundhogIdleSpeed;
+      
+      } 
+    }
+    
+    if(leftPressed){
+     move = false;
+      downPressed = false;
+      rightPressed = false;
+      image(groundhogLeft,groundhogIdleX,groundhogIdleY);
+      groundhogIdleX -= groundhogIdleSpeed;
+      if(groundhogIdleX%80 == 0){
+        leftPressed = false;
+        move = true;
+      }
+    }
+    
+    if(rightPressed){
+      move= false;
+      leftPressed = false;
+      downPressed = false;
+      image(groundhogRight,groundhogIdleX,groundhogIdleY);
+      groundhogIdleX += groundhogIdleSpeed;
+      if(groundhogIdleX%80 == 0){
+        rightPressed = false;
+        move = true;
+      }
+    }
+    
+    // Player boundary detection
+    if(groundhogIdleX<0){
+      leftPressed = false;
+      move= true;
+      groundhogIdleX = 0;
+    }
+    if(groundhogIdleX>width-80){
+      rightPressed = false;
+      move = true;
+      groundhogIdleX = width-80;
+    }
+    if(groundhogIdleY>height-80){
+      downPressed = false;
+      move= true;
+      groundhogIdleY = height-80;
+    }
 
-downPressed=false;
-
-if(groundhogIdleY + groundhogIdleHeight> 2080) 
-{groundhogIdleY = 2080 - groundhogIdleHeight;}
-}
-if(leftPressed){
-groundhogIdleX -= groundhogIdleSpeed;
-if(groundhogIdleX< 0){ groundhogIdleX= 0;}
-leftPressed=false;
-}
-if(rightPressed){
-groundhogIdleX+= groundhogIdleSpeed;
-if(groundhogIdleX + groundhogIdleWidth > width)
-{
-groundhogIdleX = width -groundhogIdleWidth;}
-rightPressed=false;
-
-}
 		// Health UI
 
    for(int i=0;i<playerHealth;i++){
@@ -292,19 +335,6 @@ break;}
 }
 
 void keyReleased(){
-    switch(keyCode){
-case UP:
-upPressed = false;
-break;
-case DOWN:
-downPressed = false;
-break;
-case RIGHT:
-rightPressed = false;
-break;
-case LEFT:
-leftPressed = false;
-break;
-    }
+
    
 }
